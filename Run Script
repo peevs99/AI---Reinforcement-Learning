@@ -1,0 +1,19 @@
+team_id = 'your_team_id'
+world_id = 'desired_world_id'
+count = 10
+move = 'your_move'
+
+get_runs = GetRunsOperation()
+print(get_runs.execute(team_id, count))
+
+get_location = GetLocationOperation()
+print(get_location.execute(team_id))
+
+enter_world = EnterWorldOperation()
+print(enter_world.execute(world_id, team_id))
+
+make_move = MakeMoveOperation()
+print(make_move.execute(team_id, move, world_id))
+
+get_score = GetScoreOperation()
+print(get_score.execute(team_id))
