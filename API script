@@ -1,0 +1,64 @@
+import requests
+
+class BaseOperation:
+    API_KEY = '3190885c968cccce7eb8'
+    USER_ID = '1137'
+    CONTENT_TYPE = 'application/x-www-form-urlencoded'
+
+    def get_headers(self):
+        return {
+            'x-api-key': self.API_KEY,
+            'userId': self.USER_ID,
+            'Content-Type': self.CONTENT_TYPE
+        }
+
+
+class GetRunsOperation(BaseOperation):
+    def execute(self, team_id, count):
+        url = f"https://www.notexponential.com/aip2pgaming/api/rl/gw.php?type=runs&teamId={team_id}&count={count}"
+        headers = self.get_headers()
+        response = requests.get(url, headers=headers)
+        return response.text
+
+
+class GetLocationOperation(BaseOperation):
+    def execute(self, team_id):
+        url = f"https://www.notexponential.com/aip2pgaming/api/rl/gw.php?type=location&teamId={team_id}"
+        headers = self.get_headers()
+        response = requests.get(url, headers=headers)
+        return response.text
+
+
+class EnterWorldOperation(BaseOperation):
+    def execute(self, world_id, team_id):
+        url = "https://www.notexponential.com/aip2pgaming/api/rl/gw.php"
+        payload = {
+            'type': 'enter',
+            'worldId': world_id,
+            'teamId': team_id
+        }
+        headers = self.get_headers()
+        response = requests.post(url, headers=headers, data=payload)
+        return response.text
+
+
+class MakeMoveOperation(BaseOperation):
+    def execute(self, team_id, move, world_id):
+        url = "https://www.notexponential.com/aip2pgaming/api/rl/gw.php"
+        payload = {
+            'type': 'move',
+            'teamId': team_id,
+            'move': move,
+            'worldId': world_id
+        }
+        headers = self.get_headers()
+        response = requests.post(url, headers=headers, data=payload)
+        return response.text
+
+
+class GetScoreOperation(BaseOperation):
+    def execute(self, team_id):
+        url = f"https://www.notexponential.com/aip2pgaming/api/rl/score.php?type=score&teamId={team_id}"
+        headers = self.get_headers()
+        response = requests.get(url, headers=headers)
+        return response.text
