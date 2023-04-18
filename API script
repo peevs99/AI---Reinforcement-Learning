@@ -1,64 +1,55 @@
 import requests
 
-class BaseOperation:
-    API_KEY = '3190885c968cccce7eb8'
-    USER_ID = '1137'
-    CONTENT_TYPE = 'application/x-www-form-urlencoded'
 
-    def get_headers(self):
-        return {
-            'x-api-key': self.API_KEY,
-            'userId': self.USER_ID,
-            'Content-Type': self.CONTENT_TYPE
-        }
+class API:
+    BASE_URL = 'https://www.notexponential.com/aip2pgaming/api'
+    HEADERS = {
+        'x-api-key': '3190885c968cccce7eb8',
+        'userId': '1137',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'PostmanRuntime/7.32.3',
+        'Accept': '*/*',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive'
+    }
 
-
-class GetRunsOperation(BaseOperation):
-    def execute(self, team_id, count):
-        url = f"https://www.notexponential.com/aip2pgaming/api/rl/gw.php?type=runs&teamId={team_id}&count={count}"
-        headers = self.get_headers()
-        response = requests.get(url, headers=headers)
+    @classmethod
+    def get_runs(cls, team_id, count):
+        url = f"{cls.BASE_URL}/rl/gw.php?type=runs&teamId={team_id}&count={count}"
+        response = requests.get(url, headers=cls.HEADERS)
         return response.text
 
-
-class GetLocationOperation(BaseOperation):
-    def execute(self, team_id):
-        url = f"https://www.notexponential.com/aip2pgaming/api/rl/gw.php?type=location&teamId={team_id}"
-        headers = self.get_headers()
-        response = requests.get(url, headers=headers)
+    @classmethod
+    def get_location(cls, team_id):
+        url = f"{cls.BASE_URL}/rl/gw.php?type=location&teamId={team_id}"
+        response = requests.get(url, headers=cls.HEADERS)
         return response.text
 
-
-class EnterWorldOperation(BaseOperation):
-    def execute(self, world_id, team_id):
-        url = "https://www.notexponential.com/aip2pgaming/api/rl/gw.php"
+    @classmethod
+    def enter_world(cls, world_id, team_id):
+        url = f"{cls.BASE_URL}/rl/gw.php"
         payload = {
             'type': 'enter',
             'worldId': world_id,
             'teamId': team_id
         }
-        headers = self.get_headers()
-        response = requests.post(url, headers=headers, data=payload)
+        response = requests.post(url, headers=cls.HEADERS, data=payload)
         return response.text
 
-
-class MakeMoveOperation(BaseOperation):
-    def execute(self, team_id, move, world_id):
-        url = "https://www.notexponential.com/aip2pgaming/api/rl/gw.php"
+    @classmethod
+    def make_move(cls, team_id, move, world_id):
+        url = f"{cls.BASE_URL}/rl/gw.php"
         payload = {
             'type': 'move',
             'teamId': team_id,
             'move': move,
             'worldId': world_id
         }
-        headers = self.get_headers()
-        response = requests.post(url, headers=headers, data=payload)
+        response = requests.post(url, headers=cls.HEADERS, data=payload)
         return response.text
 
-
-class GetScoreOperation(BaseOperation):
-    def execute(self, team_id):
-        url = f"https://www.notexponential.com/aip2pgaming/api/rl/score.php?type=score&teamId={team_id}"
-        headers = self.get_headers()
-        response = requests.get(url, headers=headers)
+    @classmethod
+    def get_score(cls, team_id):
+        url = f"{cls.BASE_URL}/rl/score.php?type=score&teamId={team_id}"
+        response = requests.get(url, headers=cls.HEADERS)
         return response.text
