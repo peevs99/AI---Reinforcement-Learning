@@ -1,3 +1,4 @@
+import os
 import json
 import numpy as np
 import time
@@ -108,7 +109,16 @@ def get_action(prev_state, new_state):
 
 
 def main():
-    Q_values = dict()
+    #Q_values = dict()
+    
+    #path = location in system where JSON file would be stored if it is not in current directory
+    #path = ''
+    # Check if JSON file exists and load Q_values from file if it does
+    if os.path.exists("q_values.json"):
+        with open("q_values.json", "r") as f:
+            Q_values = json.load(f)
+    else:
+        Q_values = dict()
 
     for ep in range(5):
         API().reset(TEAM_ID)
