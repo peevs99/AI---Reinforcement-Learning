@@ -1,17 +1,25 @@
 import os
 import json
+import random
+
 import numpy as np
 import time
 from copy import deepcopy
 from API_Script import API
+import math
 
 ACTIONS = ["D", "L", "U", "R"]
 ACTIONS_ANALOG = {"D":"S", "L":"W", "U":"N", "R":"E"}
 TEAM_ID = 1371
 WORLD_ID = 0
+EPSILON = True
+
+def get_eps(episode):
+    return math.e ** (-episode / 1.5)
 
 
-def move(q, state):
+
+def move(q, state, episode):
     if state not in q:
         q[state] = [0, 0, 0, 0]
 
@@ -40,15 +48,20 @@ def move(q, state):
     for action in unavailable_actions:
         q[state][ACTIONS.index(action)] = -np.inf
 
-    max_q = np.argmax(q[state])
 
-    action = ACTIONS[max_q]
+
+    if np.random.uniform(0, 1) > get_eps(episode):
+        max_q = np.argmax(q[state])
+        action = ACTIONS[max_q]
+    else:
+        action = random.choice(available_actions)
+
 
     x = API().make_move(TEAM_ID, ACTIONS_ANALOG[action], WORLD_ID)
 
     if x["newState"] == None:
         q[state] = [x["reward"]] * 4
-        return action, x["reward"], state, True
+        return action, action, x["reward"], state, True
 
     if x["code"] != "OK":
         print(x["message"])
@@ -66,7 +79,7 @@ def move(q, state):
         move_made = "U"
 
 
-    return move_made, x["reward"], (int(x["newState"]["x"]), int(x["newState"]["y"])), False
+    return action, move_made, x["reward"], (int(x["newState"]["x"]), int(x["newState"]["y"])), False
 
 
 def get_other_states(state, q):
@@ -109,18 +122,14 @@ def get_action(prev_state, new_state):
 
 
 def main():
-    #Q_values = dict()
-    
-    #path = location in system where JSON file would be stored if it is not in current directory
-    #path = ''
     # Check if JSON file exists and load Q_values from file if it does
-    if os.path.exists("q_values.json"):
-        with open("q_values.json", "r") as f:
+    if os.path.exists(f"World{WORLD_ID}.json"):
+        with open(f"World{WORLD_ID}.json", "r") as f:
             Q_values = json.load(f)
     else:
         Q_values = dict()
 
-    for ep in range(5):
+    for ep in range(20):
         API().reset(TEAM_ID)
         time.sleep(5)
 
@@ -130,30 +139,28 @@ def main():
         time.sleep(5)
 
         START_STATE = deepcopy(ss)
-        GAMMA = 0.95
+        GAMMA = 0.98
         ALPHA = 0.1
 
         run_rewards = []
         state = deepcopy(START_STATE)
-        while True:
-            action, reward, next_state, terminal = move(Q_values, state)
-            print("\nQ_Values -> ", Q_values[state], "\naction Taken: -> ", action, "\nreward: -> ", reward, "\nPrev State: -> ", state,
+        for i in range(500):
+            action_chosen, action_made, reward, next_state, terminal = move(Q_values, state, ep)
+            print("\nQ_Values -> ", Q_values[state], "\naction Chosen: -> ", action_chosen, "\naction Taken: -> ", action_made, "\nreward: -> ", reward, "\nPrev State: -> ", state,
                   "\nnew state: -> ", next_state, "\nscore -> ", API().get_score(TEAM_ID)['score'], "\nStates Explored -> ", len(Q_values))
 
             if terminal:
                 break
 
             if next_state == state:
-                time.sleep(5)
+                time.sleep(1)
                 continue
 
             if next_state not in Q_values:
                 Q_values[next_state] = [0, 0, 0, 0]
 
-            act = get_action(state, next_state)
-
-            Q_values[state][ACTIONS.index(act)] += ALPHA * (
-                        reward + GAMMA * np.max(Q_values[next_state]) - Q_values[state][ACTIONS.index(act)])
+            Q_values[state][ACTIONS.index(action_made)] += ALPHA * (
+                        reward + GAMMA * np.max(Q_values[next_state]) - Q_values[state][ACTIONS.index(action_made)])
 
             state = deepcopy(next_state)
 
@@ -163,7 +170,7 @@ def main():
 
             time.sleep(1)
            
-        with open(f"Q_values_ep{ep}.json", "w") as f:
+        with open(f"World{WORLD_ID}.json", "w") as f:
             json.dump(Q_values, f)
 
 main()
