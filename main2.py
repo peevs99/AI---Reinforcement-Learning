@@ -126,6 +126,9 @@ def main():
     if os.path.exists(f"World{WORLD_ID}.json"):
         with open(f"World{WORLD_ID}.json", "r") as f:
             Q_values = json.load(f)
+            for key, value in Q_values.items():
+                if isinstance(value, list):
+                    Q_values[key] = tuple(value)
     else:
         Q_values = dict()
 
@@ -171,6 +174,6 @@ def main():
             time.sleep(1)
            
         with open(f"World{WORLD_ID}.json", "w") as f:
-            json.dump(Q_values, f)
+            json.dump(Q_values, f, default=lambda x: list(x))
 
 main()
