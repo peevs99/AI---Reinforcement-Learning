@@ -11,12 +11,12 @@ import math
 ACTIONS = ["D", "L", "U", "R"]
 ACTIONS_ANALOG = {"D":"S", "L":"W", "U":"N", "R":"E"}
 TEAM_ID = 1364
-WORLD_ID = 2
+WORLD_ID = 1
 EPSILON = True
 
 def get_eps(episode):
-    # return math.e ** (-episode/2)
-    return 0
+    return math.e ** (-episode/2)
+    # return 0
     # return 0.5
 
 
@@ -163,7 +163,7 @@ def main():
 
         run_rewards = []
         state = deepcopy(START_STATE)
-        for i in range(2000):
+        for i in range(3000):
             action_chosen, action_made, reward, next_state, terminal = move(Q_values, state, ep)
             print("\nQ_Values -> ", Q_values[state], "\naction Chosen: -> ", action_chosen, "\naction Taken: -> ", action_made, "\nreward: -> ", reward, "\nPrev State: -> ", state,
                   "\nnew state: -> ", next_state, "\nscore -> ", API().get_score(TEAM_ID)['score'], "\nStates Explored -> ", len(Q_values))
