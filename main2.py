@@ -10,12 +10,14 @@ import math
 
 ACTIONS = ["D", "L", "U", "R"]
 ACTIONS_ANALOG = {"D":"S", "L":"W", "U":"N", "R":"E"}
-TEAM_ID = 1371
-WORLD_ID = 0
+TEAM_ID = 1364
+WORLD_ID = 2
 EPSILON = True
 
 def get_eps(episode):
-    return math.e ** (-episode / 1.5)
+    # return math.e ** (-episode/2)
+    return 0
+    # return 0.5
 
 
 
@@ -54,7 +56,18 @@ def move(q, state, episode):
         max_q = np.argmax(q[state])
         action = ACTIONS[max_q]
     else:
-        action = random.choice(available_actions)
+        if 0 in q[state]:
+            while True:
+                ind = random.randint(0, 3)
+                ac = ACTIONS[ind]
+                if ac in available_actions and q[state][ind] == 0:
+                    action = ac
+                    break
+            print(ind, action)
+        else:
+            action = random.choice(available_actions)
+
+
 
 
     x = API().make_move(TEAM_ID, ACTIONS_ANALOG[action], WORLD_ID)
@@ -125,10 +138,13 @@ def main():
     # Check if JSON file exists and load Q_values from file if it does
     if os.path.exists(f"World{WORLD_ID}.json"):
         with open(f"World{WORLD_ID}.json", "r") as f:
-            Q_values = json.load(f)
-            for key, value in Q_values.items():
-                if isinstance(value, list):
-                    Q_values[key] = tuple(value)
+            zzz = json.load(f)
+            Q_values = dict()
+            for i in zzz:
+                k = tuple(int(j) for j in i.split(','))
+                v = zzz[i]
+                Q_values[k] = v
+
     else:
         Q_values = dict()
 
@@ -147,7 +163,7 @@ def main():
 
         run_rewards = []
         state = deepcopy(START_STATE)
-        for i in range(500):
+        for i in range(2000):
             action_chosen, action_made, reward, next_state, terminal = move(Q_values, state, ep)
             print("\nQ_Values -> ", Q_values[state], "\naction Chosen: -> ", action_chosen, "\naction Taken: -> ", action_made, "\nreward: -> ", reward, "\nPrev State: -> ", state,
                   "\nnew state: -> ", next_state, "\nscore -> ", API().get_score(TEAM_ID)['score'], "\nStates Explored -> ", len(Q_values))
@@ -171,9 +187,13 @@ def main():
             print("cum_rewards -> ", sum(run_rewards), "\n")
             print('--------------------------------------------------------------------------------------------------------')
 
-            time.sleep(1)
+            time.sleep(0.1)
            
         with open(f"World{WORLD_ID}.json", "w") as f:
-            json.dump(Q_values, f, default=lambda x: list(x))
+            zzz = dict()
+            for i in Q_values:
+                print(','.join([str(j) for j in i]), Q_values[i])
+                zzz[','.join([str(j) for j in i])] = Q_values[i]
+            json.dump(zzz, f)
 
 main()

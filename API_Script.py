@@ -5,8 +5,8 @@ import json
 class API:
     BASE_URL = 'https://www.notexponential.com/aip2pgaming/api'
     HEADERS = {
-        'x-api-key': 'f74c3d7259e8ea471636',
-        'userId': '1160',
+        'x-api-key': '85880584f52766b697e6',
+        'userId': '1159',
         'Content-Type': 'application/x-www-form-urlencoded',
         'User-Agent': 'PostmanRuntime/7.32.3',
         'Accept': '*/*',
